@@ -1,25 +1,33 @@
-import { Request, Response } from "express";
-import { sendDailyEmail } from "../services/email.service";
+import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { EmailService } from '../services/email.service';
 
-export const sendReport = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const { pdfBase64, userEmail, squadName } = req.body;
+@Controller('daily')
+export class DailyController {
+  constructor(private readonly emailService: EmailService) {}
+
+  @Post('report')
+  async sendReport(
+    @Body() body: { pdfBase64: string; userEmail: string; squadName: string },
+  ) {
+    const { pdfBase64, userEmail, squadName } = body;
 
     if (!pdfBase64 || !userEmail || !squadName) {
-      res.status(400).json({ error: "Dados incompletos" });
-      return;
+      throw new HttpException(
+        { error: 'Dados incompletos' },
+        HttpStatus.BAD_REQUEST,
+      );
     }
-    await sendDailyEmail({
-      userEmail,
-      pdfBase64,
-    });
 
-    res.json({ success: true, message: "Relatório enviado!" });
-  } catch (error) {
-    console.error("Erro:", error);
-    res.status(500).json({ error: "Erro ao enviar relatório" });
+  try {
+    await EmailService.sendDailyEmail(userEmail, pdfBase64);
+
+    return { success: true, message: 'Relatório enviado!' };
+    } catch (error) {
+      console.error('Erro:', error);
+      throw new HttpException(
+        { error: 'Erro ao enviar relatório' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
-};
+}

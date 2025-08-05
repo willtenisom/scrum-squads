@@ -2,32 +2,38 @@
   "name": "scrum-squad-server",
   "version": "1.0.0",
   "description": "Servidor para o Scrum Squad",
-  "main": "dist/app.js",
+  "main": "dist/main.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "start": "node -r tsconfig-paths/register dist/main.js",
     "build": "tsc",
-    "start": "node dist/app.js"
+    "start:dev": "ts-node-dev --respawn --transpile-only src/main.ts"
   },
   "dependencies": {
+    "@nestjs/common": "^10.2.5",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^10.2.5",
+    "@nestjs/mapped-types": "^2.1.0",
+    "@nestjs/mongoose": "^10.0.0",
+    "@nestjs/platform-express": "^10.2.5",
+    "@nestjs/swagger": "^7.3.0",
+    "@nestjs/cli": "^10.2.5",
+    "@nestjs/testing": "^10.2.5",
     "@sendgrid/mail": "^8.1.5",
-    "cors": "^2.8.5",
+    "@types/knex": "^0.15.2",
+    "@types/node": "^20.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "html2pdf.js": "^0.10.3",
-    "knex": "^3.1.0",
-    "mysql2": "^3.14.1",
-    "nodemailer": "^7.0.3",
-    "pg": "^8.15.6",
-    "sqlite3": "^5.1.7",
-    "typescript": "^4.0.0"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "@types/knex": "^0.16.1",
-    "@types/node": "^24.0.1",
-    "ts-node-dev": "^1.0.0"
-  },
-  "author": "Seu Nome",
-  "license": "MIT"
+    "eslint": "^8.44.0",
+    "mongoose": "^7.4.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.0",
+    "swagger-ui-express": "^5.0.1",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.1.6"
+  }
 }
