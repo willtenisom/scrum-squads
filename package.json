@@ -1,12 +1,20 @@
 {
-  "name": "my-turborepo",
+  "name": "scrum-squads-monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "build:admin": "pnpm build --filter admin-dashboard",
+    "build:backend": "pnpm build --filter backend-nestjs",
     "dev": "turbo run dev",
+    "dev:admin": "pnpm dev --filter admin-dashboard",
+    "dev:alunos": "pnpm dev --filter painel-alunos",
+    "dev:backend": "pnpm dev --filter backend-nestjs",
+    "start:admin": "pnpm start --filter admin-dashboard",
+    "start:backend": "pnpm start --filter backend-nestjs",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "check-types": "turbo run check-types",
+    "clean": "rm -rf node_modules && rm -rf apps/*/node_modules && rm -rf packages/*/node_modules && rm -rf .turbo"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
@@ -16,7 +24,7 @@
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "npm@10.5.1",
+  "packageManager": "pnpm@9.0.0",
   "workspaces": [
     "apps/*",
     "packages/*"

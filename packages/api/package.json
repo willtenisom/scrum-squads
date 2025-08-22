@@ -1,0 +1,8 @@
+{
+  "name": "@scrum-squads/api",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@scrum-squads/types": "workspace:*"
+  }
+}
