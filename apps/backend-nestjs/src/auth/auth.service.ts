@@ -1,7 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService, User } from '../users/users.service';
+import { UsersService } from '../users/users.service';
+import { UserDocument } from '../schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -10,40 +11,42 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<Omit<User, 'password'> | null> {
+  // Valida usuário e retorna sem a senha
+  async validateUser(email: string, password: string): Promise<Omit<UserDocument, 'password'> | null> {
     const user = await this.usersService.findByEmail(email);
     if (!user) return null;
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) return null;
 
-    // Retorna usuário sem a senha
-    const { password: _, ...result } = user;
-    return result;
+    // Converte o documento Mongoose para objeto JS e remove a senha
+    const userObj = user.toObject();
+    delete userObj.password;
+    return userObj;
   }
 
+  // Login
   async login(email: string, password: string) {
     const user = await this.validateUser(email, password);
     if (!user) throw new UnauthorizedException('Credenciais inválidas');
 
-    const payload = { sub: user.id, role: user.role };
+    const payload = { sub: user._id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
       user,
     };
   }
 
-async register(userData: Partial<User>) {
-  if (!userData.password) {
-    throw new Error('Senha é obrigatória');
+  // Registro
+  async register(userData: Partial<UserDocument>) {
+    if (!userData.password) {
+      throw new Error('Senha é obrigatória');
+    }
+
+    // Hash da senha
+    const salt = await bcrypt.genSalt(10);
+    userData.password = await bcrypt.hash(userData.password, salt);
+
+    return this.usersService.create(userData);
   }
-
-  // Hash da senha
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(userData.password, salt);
-  userData.password = hashedPassword;
-
-  return this.usersService.create(userData);
-}
-
 }

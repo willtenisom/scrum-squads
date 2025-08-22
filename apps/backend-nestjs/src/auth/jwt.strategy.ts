@@ -1,18 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { UsersService } from '../users/users.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'SUA_CHAVE_SECRETA_AQUI', 
+      secretOrKey: configService.get<string>('JWT_SECRET')!, // pega do .env
     });
   }
 
   async validate(payload: any) {
-    return { userId: payload.sub, role: payload.role };
+    const user = await this.usersService.findById(payload.sub);
+    if (!user) throw new UnauthorizedException('Usuário não encontrado');
+
+    // Retorna somente os dados que você quer no req.user
+    return {
+      id: user._id,
+      nome: user.nome,
+      email: user.email,
+      role: user.role,
+      turmaId: user.turmaId,
+      squadId: user.squadId,
+    };
   }
 }

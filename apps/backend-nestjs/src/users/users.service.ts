@@ -1,76 +1,66 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-
-export type User = {
-  id: number;
-  nome: string;
-  email: string;
-  password: string;
-  role: 'admin' | 'user';
-  turmaId?: number;
-  squadId?: number;
-};
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { User, UserDocument } from '../schemas/user.schema';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [
-    {
-      id: 1,
-      nome: 'Admin Teste',
-      email: 'admin@teste.com',
-      password: '123456', // use bcryptjs para hash real depois
-      role: 'admin',
-      turmaId: 1,
-      squadId: 1,
-    },
-  ];
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  // Encontrar usuário pelo nome e turma (para acesso de alunos)
-  findByNameAndTurma(nome: string, turmaId: number): User | undefined {
-    return this.users.find(u => u.nome === nome && u.turmaId === Number(turmaId));
+  // Criar usuário (com hash de senha)
+  async create(userData: Partial<User>): Promise<User> {
+    if (!userData.password) throw new BadRequestException('Senha é obrigatória');
+    const salt = await bcrypt.genSalt(10);
+    userData.password = await bcrypt.hash(userData.password, salt);
+
+    const user = new this.userModel(userData);
+    return user.save();
   }
 
-  // Listar todos os alunos de uma turma (campos públicos)
-  findAllByTurma(turmaId: number) {
-    return this.users
-      .filter(u => u.turmaId === Number(turmaId))
-      .map(u => ({
-        id: u.id,
-        nome: u.nome,
-        turmaId: u.turmaId,
-        squadId: u.squadId,
-      }));
+  // Listar todos os usuários
+  async findAll(): Promise<User[]> {
+    return this.userModel.find().select('-password').exec();
   }
 
-  // CRUD admin
-  create(userData: Partial<User>) {
-    const newUser: User = {
-      id: this.users.length + 1,
-      ...userData,
-    } as User;
-    this.users.push(newUser);
-    return newUser;
-  }
-
-  findById(id: number) {
-    const user = this.users.find(u => u.id === id);
+  // Buscar usuário por ID
+  async findById(id: string): Promise<User> {
+    if (!Types.ObjectId.isValid(id)) throw new BadRequestException('ID inválido.');
+    const user = await this.userModel.findById(id).exec();
     if (!user) throw new NotFoundException('Usuário não encontrado');
     return user;
   }
 
-  update(id: number, data: Partial<User>) {
-    const user = this.findById(id);
-    Object.assign(user, data);
-    return user;
+  // Atualizar usuário (hash da senha se for alterada)
+  async update(id: string, data: Partial<User>): Promise<User> {
+    if (data.password) {
+      const salt = await bcrypt.genSalt(10);
+      data.password = await bcrypt.hash(data.password, salt);
+    }
+    const updated = await this.userModel.findByIdAndUpdate(id, data, { new: true }).exec();
+    if (!updated) throw new NotFoundException('Usuário não encontrado');
+    return updated;
   }
 
-  remove(id: number) {
-    const user = this.findById(id);
-    this.users = this.users.filter(u => u.id !== id);
-    return { message: 'Usuário removido com sucesso', user };
+  // Remover usuário
+  async remove(id: string): Promise<void> {
+    const result = await this.userModel.findByIdAndDelete(id).exec();
+    if (!result) throw new NotFoundException('Usuário não encontrado');
   }
 
   // Buscar por email (login)
   async findByEmail(email: string): Promise<User | undefined> {
-    return this.users.find(u => u.email === email);
+    const user = await this.userModel.findOne({ email }).exec();
+    return user || undefined;
+  }
+
+  // Buscar usuário pelo nome e turma (para alunos)
+  async findByNameAndTurma(nome: string, turmaId: string): Promise<User | null> {
+    return this.userModel.findOne({ nome, turmaId }).exec();
+  }
+
+  // Listar todos os usuários de uma turma (sem senha)
+  async findAllByTurma(turmaId: string): Promise<User[]> {
+    return this.userModel.find({ turmaId }).select('-password').exec();
   }
 }
