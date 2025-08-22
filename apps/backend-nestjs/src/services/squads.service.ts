@@ -13,25 +13,23 @@ export class SquadsService {
     @InjectModel(Aluno.name) private alunoModel: Model<AlunoDocument>,
   ) {}
 
-  // Criar squad
+  // Criar squad → apenas admin
   async create(dto: CreateSquadDto): Promise<Squad> {
     try {
       const squad = new this.squadModel(dto);
       return await squad.save();
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new BadRequestException(error.message);
-      }
+      if (error instanceof Error) throw new BadRequestException(error.message);
       throw new BadRequestException('Erro ao criar squad.');
     }
   }
 
-  // Listar todos os squads
+  // Listar todos os squads → qualquer aluno autenticado
   async findAll(): Promise<Squad[]> {
     return this.squadModel.find().populate('alunos').exec();
   }
 
-  // Buscar squad por ID
+  // Buscar squad por ID → qualquer aluno autenticado
   async findById(id: string): Promise<Squad> {
     if (!Types.ObjectId.isValid(id)) throw new BadRequestException('ID inválido.');
     const squad = await this.squadModel.findById(id).populate('alunos').exec();
@@ -39,7 +37,7 @@ export class SquadsService {
     return squad;
   }
 
-  // Atualizar squad
+  // Atualizar squad → apenas admin
   async update(id: string, dto: UpdateSquadDto): Promise<Squad> {
     if (!Types.ObjectId.isValid(id)) throw new BadRequestException('ID inválido.');
     const updated = await this.squadModel.findByIdAndUpdate(id, dto, { new: true }).exec();
@@ -47,14 +45,14 @@ export class SquadsService {
     return updated;
   }
 
-  // Remover squad
+  // Remover squad → apenas admin
   async remove(id: string): Promise<void> {
     if (!Types.ObjectId.isValid(id)) throw new BadRequestException('ID inválido.');
     const deleted = await this.squadModel.findByIdAndDelete(id).exec();
     if (!deleted) throw new NotFoundException(`Squad com ID "${id}" não encontrada.`);
   }
 
-  // Adicionar aluno a squad
+  // Adicionar aluno a squad → apenas admin
   async addAluno(squadId: string, alunoId: string): Promise<Squad> {
     if (!Types.ObjectId.isValid(squadId) || !Types.ObjectId.isValid(alunoId)) {
       throw new BadRequestException('ID inválido.');
@@ -75,15 +73,20 @@ export class SquadsService {
     return squad.populate('alunos');
   }
 
- // Listar alunos de um squad
-async getAlunosBySquad(squadId: string): Promise<Aluno[]> {
-  const squad = await this.squadModel
-    .findById(squadId)
-    .populate<{ alunos: Aluno[] }>('alunos') 
-    .exec();
+  // Listar alunos de um squad → qualquer aluno autenticado
+  async getAlunosBySquad(squadId: string): Promise<Aluno[]> {
+    const squad = await this.squadModel
+      .findById(squadId)
+      .populate<{ alunos: Aluno[] }>('alunos')
+      .exec();
 
-  if (!squad) throw new NotFoundException(`Squad com ID "${squadId}" não encontrada.`);
+    if (!squad) throw new NotFoundException(`Squad com ID "${squadId}" não encontrada.`);
+    return squad.alunos;
+  }
 
-  return squad.alunos;
-}
+  // 🔹 Retorna todos os squads de um aluno (pode ser usado no controller)
+  async findAllByAluno(alunoId: string): Promise<Squad[]> {
+    if (!Types.ObjectId.isValid(alunoId)) throw new BadRequestException('ID de aluno inválido.');
+    return this.squadModel.find({ alunos: alunoId }).populate('alunos').exec();
+  }
 }

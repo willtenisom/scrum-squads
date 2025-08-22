@@ -6,19 +6,27 @@ import {
   Param,
   Body,
   Delete,
+  Query,
   BadRequestException,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AlunosService } from '../services/alunos.service';
 import { CreateAlunoDto } from '../entities/dto/create-aluno.dto';
 import { UpdateAlunoDto } from '../entities/dto/update-aluno.dto';
 import { Aluno } from '../schemas/aluno.schema';
+import { JwtAuthGuard } from '../common/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('alunos')
 export class AlunosController {
   constructor(private readonly alunosService: AlunosService) {}
 
-  // Criar novo aluno
+  // Criar novo aluno → apenas admin
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   async create(@Body() dto: CreateAlunoDto): Promise<Aluno> {
     try {
       return await this.alunosService.create(dto);
@@ -30,31 +38,43 @@ export class AlunosController {
     }
   }
 
-  // Buscar todos os alunos
+  // Listar alunos → qualquer aluno pode listar a própria turma
   @Get()
-  async findAll(): Promise<Aluno[]> {
-    return this.alunosService.findAll();
+  async findAll(@Query('nome') nome: string, @Query('turmaId') turmaId: string): Promise<Aluno[]> {
+    if (!nome || !turmaId) {
+      throw new BadRequestException('Informe nome completo e turmaId para acessar a lista.');
+    }
+
+    const requester = await this.alunosService.findByNameAndTurma(nome, Number(turmaId));
+    if (!requester) {
+      throw new BadRequestException('Acesso negado.');
+    }
+
+    return this.alunosService.findAllByTurma(Number(turmaId));
   }
 
-  // Buscar aluno por ID
+  // Buscar aluno por ID → apenas admin
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   async findOne(@Param('id') id: string): Promise<Aluno> {
-    return this.alunosService.findById(id); // service lança NotFoundException se não achar
+    return this.alunosService.findById(id);
   }
 
-  // Atualizar aluno
+  // Atualizar aluno → apenas admin
   @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() dto: UpdateAlunoDto,
-  ): Promise<Aluno> {
-    return this.alunosService.update(id, dto); // service lança NotFoundException se não achar
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async update(@Param('id') id: string, @Body() dto: UpdateAlunoDto): Promise<Aluno> {
+    return this.alunosService.update(id, dto);
   }
 
-  // Remover aluno
+  // Remover aluno → apenas admin
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   async remove(@Param('id') id: string): Promise<{ message: string }> {
-    await this.alunosService.remove(id); // service lança NotFoundException se não achar
+    await this.alunosService.remove(id);
     return { message: `Aluno com ID "${id}" removido com sucesso.` };
   }
 }

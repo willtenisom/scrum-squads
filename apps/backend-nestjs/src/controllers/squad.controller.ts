@@ -7,19 +7,26 @@ import {
   Body,
   Delete,
   BadRequestException,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { SquadsService } from '../services/squads.service';
 import { CreateSquadDto } from '../entities/dto/create-squad.dto';
 import { UpdateSquadDto } from '../entities/dto/update-squad.dto';
 import { Squad } from '../schemas/squad.schema';
 import { Aluno } from '../schemas/aluno.schema';
+import { JwtAuthGuard } from '../common/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('squads')
 export class SquadsController {
   constructor(private readonly squadsService: SquadsService) {}
 
-  // Criar novo squad
+  // Criar novo squad → apenas admin
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   async create(@Body() dto: CreateSquadDto): Promise<Squad> {
     try {
       return await this.squadsService.create(dto);
@@ -31,46 +38,49 @@ export class SquadsController {
     }
   }
 
-  // Listar todos os squads
+  // Listar todos os squads → qualquer aluno autenticado
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findAll(): Promise<Squad[]> {
     return this.squadsService.findAll();
   }
 
-  // Buscar squad por ID
+  // Buscar squad por ID → qualquer aluno autenticado
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string): Promise<Squad> {
-    return this.squadsService.findById(id); // service lança NotFoundException se não achar
+    return this.squadsService.findById(id);
   }
 
-  // Atualizar squad
+  // Atualizar squad → apenas admin
   @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() dto: UpdateSquadDto,
-  ): Promise<Squad> {
-    return this.squadsService.update(id, dto); // service lança NotFoundException se não achar
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async update(@Param('id') id: string, @Body() dto: UpdateSquadDto): Promise<Squad> {
+    return this.squadsService.update(id, dto);
   }
 
-  // Remover squad
+  // Remover squad → apenas admin
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   async remove(@Param('id') id: string): Promise<{ message: string }> {
-    await this.squadsService.remove(id); // service lança NotFoundException se não achar
+    await this.squadsService.remove(id);
     return { message: `Squad com ID "${id}" removido com sucesso.` };
   }
 
-  // Adicionar aluno ao squad
+  // Adicionar aluno ao squad → apenas admin
   @Post(':id/alunos/:alunoId')
-  async addAluno(
-    @Param('id') squadId: string,
-    @Param('alunoId') alunoId: string,
-  ): Promise<Squad> {
-    return this.squadsService.addAluno(squadId, alunoId); // service lida com erros
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async addAluno(@Param('id') squadId: string, @Param('alunoId') alunoId: string): Promise<Squad> {
+    return this.squadsService.addAluno(squadId, alunoId);
   }
 
-  // Listar todos os alunos do squad
+  // Listar todos os alunos do squad → qualquer aluno autenticado
   @Get(':id/alunos')
+  @UseGuards(JwtAuthGuard)
   async getAlunos(@Param('id') squadId: string): Promise<Aluno[]> {
-    return this.squadsService.getAlunosBySquad(squadId); // service lida com erros
+    return this.squadsService.getAlunosBySquad(squadId);
   }
 }
