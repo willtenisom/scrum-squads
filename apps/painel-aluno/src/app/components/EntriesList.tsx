@@ -15,7 +15,7 @@ interface EntriesListProps {
   onDeleteEntry: (memberId: string, entryIndex: number) => void;
 }
 const squadHeaderStyles: Record<string, string> = {
-  "1": "bg-squad1 text-gray-800",
+  "1": "bg-squad1 text-gray-900",
   "2": "bg-squad2 text-[#0369a1]",
   "3": "bg-squad3 text-[#047857]",
   "4": "bg-squad4 text-[#6d28d9]",
