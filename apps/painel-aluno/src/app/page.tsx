@@ -1,103 +1,177 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useRef, FormEvent } from "react";
+import DailyForm, { NewEntryData } from "./components/DailyForm";
+import EntriesList, { Entry } from "./components/EntriesList";
+
+import type { default as html2pdf } from "html2pdf.js";
+
+export default function DailyScrumPage() {
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
+  const squadsContainerRef = useRef<HTMLDivElement>(null);
+
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const [pendingEntry, setPendingEntry] = useState<NewEntryData | null>(null);
+
+  const handleAddEntry = (newEntry: NewEntryData) => {
+    if (!userEmail) {
+      setPendingEntry(newEntry);
+      setIsModalOpen(true);
+    } else {
+      addEntryToList(newEntry);
+    }
+  };
+
+  const addEntryToList = (entryToAdd: NewEntryData) => {
+    setEntries((prevEntries) =>
+      [...prevEntries, entryToAdd].sort((a, b) =>
+        a.memberName.localeCompare(b.memberName)
+      )
+    );
+  };
+
+  const handleEmailSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const emailInput = e.currentTarget.elements.namedItem(
+      "email"
+    ) as HTMLInputElement;
+    const email = emailInput.value;
+
+    if (email && email.includes("@")) {
+      setUserEmail(email);
+      setIsModalOpen(false);
+
+      if (pendingEntry) {
+        addEntryToList(pendingEntry);
+        setPendingEntry(null);
+      }
+    } else {
+      alert("Por favor, insira um e-mail válido.");
+    }
+  };
+
+  const handleDeleteEntry = (memberId: string, entryIndex: number) => {
+    if (confirm("Tem certeza que deseja remover este registro?")) {
+      setEntries((prevEntries) =>
+        prevEntries.filter((_entry, index) => index !== entryIndex)
+      );
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!userEmail) {
+      alert(
+        "Por favor, adicione pelo menos um registro e informe seu e-mail antes de exportar."
+      );
+      return;
+    }
+    if (!squadsContainerRef.current || entries.length === 0) {
+      alert("Adicione registros antes de exportar.");
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const config = {
+        margin: 10,
+        filename: `daily-scrum-${new Date().toLocaleDateString("pt-BR")}.pdf`,
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+      await html2pdf().from(squadsContainerRef.current).set(config).save();
+      alert("PDF gerado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar o PDF:", error);
+      alert("Ocorreu um erro ao gerar o PDF.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <>
+      {}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4 text-gray-800">
+              Informe seu e-mail para continuar
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Este e-mail será usado para o envio do relatório.
+            </p>
+            <form onSubmit={handleEmailSubmit}>
+              <label
+                htmlFor="email"
+                className="font-semibold text-sm text-gray-700"
+              >
+                Seu e-mail
+              </label>
+              <input
+                type="email"
+                name="email"
+                required
+                className="p-3 mt-2 border border-gray-300 rounded-lg w-full text-base focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="email"
+              />
+              <div className="flex justify-end mt-6">
+                <button
+                  type="submit"
+                  className="bg-primary text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  Salvar e Continuar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* --- CONTEÚDO PRINCIPAL DA PÁGINA --- */}
+      <main className="p-4 sm:p-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+            <div className="flex justify-between items-start mb-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-primary">
+                📋 Daily Scrum - Quadro por Squads
+              </h1>
+              {}
+              {userEmail && (
+                <div className="text-right text-sm">
+                  <span className="font-semibold text-gray-500">
+                    Relatório de:
+                  </span>
+                  <p className="text-gray-800">{userEmail}</p>
+                </div>
+              )}
+            </div>
+
+            <DailyForm onAddEntry={handleAddEntry} />
+
+            <div className="flex justify-center my-6">
+              <button
+                onClick={handleExportPdf}
+                disabled={isExporting || entries.length === 0}
+                className="bg-success text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm"
+              >
+                {isExporting ? "Gerando PDF..." : "Exportar Registros como PDF"}
+              </button>
+            </div>
+
+            <div className="border-t border-gray-200 my-8"></div>
+
+            <div ref={squadsContainerRef}>
+              <EntriesList
+                entries={entries}
+                onDeleteEntry={handleDeleteEntry}
+              />
+            </div>
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    </>
   );
 }
