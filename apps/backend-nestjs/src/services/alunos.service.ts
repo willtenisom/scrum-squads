@@ -11,10 +11,12 @@ export class AlunosService {
     @InjectModel(Aluno.name) private alunoModel: Model<AlunoDocument>,
   ) {}
 
+  // Listar todos os alunos (admin)
   async findAll(): Promise<Aluno[]> {
     return this.alunoModel.find().exec();
   }
 
+  // Buscar aluno por ID (admin)
   async findById(id: string): Promise<Aluno> {
     if (!Types.ObjectId.isValid(id)) throw new BadRequestException('ID inválido.');
     const aluno = await this.alunoModel.findById(id).exec();
@@ -22,6 +24,7 @@ export class AlunosService {
     return aluno;
   }
 
+  // Criar aluno (admin)
   async create(createAlunoDto: CreateAlunoDto): Promise<Aluno> {
     try {
       const createdAluno = new this.alunoModel(createAlunoDto);
@@ -31,6 +34,7 @@ export class AlunosService {
     }
   }
 
+  // Atualizar aluno (admin)
   async update(id: string, updateAlunoDto: UpdateAlunoDto): Promise<Aluno> {
     if (!Types.ObjectId.isValid(id)) throw new BadRequestException('ID inválido.');
     const updatedAluno = await this.alunoModel.findByIdAndUpdate(id, updateAlunoDto, { new: true }).exec();
@@ -38,9 +42,21 @@ export class AlunosService {
     return updatedAluno;
   }
 
+  // Remover aluno (admin)
   async remove(id: string): Promise<void> {
     if (!Types.ObjectId.isValid(id)) throw new BadRequestException('ID inválido.');
     const result = await this.alunoModel.findByIdAndDelete(id).exec();
     if (!result) throw new NotFoundException(`Aluno com id ${id} não encontrado`);
+  }
+
+  // 🔹 Verifica se o aluno requisitante existe na turma e com o nome informado
+  async findByNameAndTurma(nome: string, turmaId: number): Promise<Aluno | null> {
+    const aluno = await this.alunoModel.findOne({ nome, turma: turmaId }).exec();
+    return aluno;
+  }
+
+  // 🔹 Retorna todos os alunos de uma turma (apenas quem passou na validação acima)
+  async findAllByTurma(turmaId: number): Promise<Aluno[]> {
+    return this.alunoModel.find({ turma: turmaId }).exec();
   }
 }
