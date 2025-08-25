@@ -1,22 +1,21 @@
-# Build stage
-FROM node:18-alpine AS builder
+# Imagem base
+FROM node:20-alpine
+
 WORKDIR /app
+
+# Copiar package.json do backend
 COPY package*.json ./
-RUN npm install
+
+# Instalar pnpm e dependências
+RUN npm install -g pnpm
+RUN pnpm install
+
+# Copiar todo o backend
 COPY . .
-RUN npm run build
 
-# Final stage
-FROM node:18-alpine
-WORKDIR /app
+# Build NestJS
+RUN pnpm build
 
-# Copia apenas as dependências instaladas no builder (node_modules)
-COPY --from=builder /app/node_modules ./node_modules
-
-# Copia o código compilado
-COPY --from=builder /app/dist ./dist
-
-# Se precisar de arquivos de configuração (ex: .env) copie também
-# COPY .env ./
+EXPOSE 3001
 
 CMD ["node", "dist/main.js"]
