@@ -1,3 +1,26 @@
+//"use client";
+
+//import { useEffect } from "react";
+//import { useRouter } from "next/navigation";
+//import { useAuth } from "@/app/context/auth";
+
+//export default function DashboardPage() {
+  //const router = useRouter();
+  //const { token } = useAuth();
+
+  //useEffect(() => {
+  //  if (!token) router.push("/login");
+ // }, [token, router]);
+
+  //if (!token) return <p>Redirecting...</p>;
+
+  //return <div>Welcome to the Admin Dashboard!</div>;
+//}
+
+
+
+
+
 import Image from "next/image";
 
 export default function Home() {

@@ -5,21 +5,25 @@ import * as dotenv from 'dotenv';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  dotenv.config(); // Carrega variáveis de ambiente do .env
+  dotenv.config(); // Carrega variáveis de ambiente
 
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api'); // Prefixa todas as rotas com /api
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
+
+  app.setGlobalPrefix('api');
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,            // Remove propriedades não declaradas no DTO
-      forbidNonWhitelisted: true, // Retorna erro se tiver propriedades não declaradas
-      transform: true,            // Transforma payloads automaticamente para classes
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 
-  // Configuração do Swagger
   const config = new DocumentBuilder()
     .setTitle('Scrum Squad API')
     .setDescription('Documentação da API do Scrum Squad')
@@ -27,7 +31,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document); // Disponibiliza Swagger em /api/docs
+  SwaggerModule.setup('api/docs', app, document);
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
