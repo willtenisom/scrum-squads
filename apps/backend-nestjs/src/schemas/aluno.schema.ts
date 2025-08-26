@@ -12,11 +12,9 @@ export class Aluno {
   @Prop({ required: true, unique: true })
   email!: string;
 
-  // Relacionamento com a turma
   @Prop({ type: Types.ObjectId, ref: 'Turma', required: true })
   turma!: Types.ObjectId;
 
-  // Squad é opcional
   @Prop({ type: Types.ObjectId, ref: 'Squad', required: false })
   squad?: Types.ObjectId;
 }

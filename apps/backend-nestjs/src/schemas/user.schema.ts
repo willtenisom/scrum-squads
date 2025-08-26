@@ -12,8 +12,12 @@ export class User extends Document {
   @Prop({ required: true })
   password!: string;
 
-  @Prop({ required: true, enum: ['admin', 'user'] })
-  role!: 'admin' | 'user';
+  @Prop({
+    required: true,
+    enum: ['admin', 'user', 'super_admin'], 
+    default: 'user', 
+  })
+  role!: 'admin' | 'user' | 'super_admin';
 
   @Prop({ type: Types.ObjectId, ref: 'Turma', default: null })
   turmaId?: string;

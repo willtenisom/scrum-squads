@@ -3,9 +3,10 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AllExceptionsFilter } from './filters/all-exceptions.filter'; 
 
 async function bootstrap() {
-  dotenv.config(); // Carrega variáveis de ambiente
+  dotenv.config();
 
   const app = await NestFactory.create(AppModule);
 
@@ -23,6 +24,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // 🚨 Aplica o filtro global
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   const config = new DocumentBuilder()
     .setTitle('Scrum Squad API')

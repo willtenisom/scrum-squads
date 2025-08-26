@@ -18,17 +18,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    const user = await this.usersService.findById(payload.sub);
-    if (!user) throw new UnauthorizedException('Usuário não encontrado');
+  const user = await this.usersService.findById(payload.sub.toString());
+  if (!user) throw new UnauthorizedException('Usuário não encontrado');
 
-    // Retorna somente os dados que você quer no req.user
-    return {
-      id: user._id,
-      nome: user.nome,
-      email: user.email,
-      role: user.role,
-      turmaId: user.turmaId,
-      squadId: user.squadId,
-    };
-  }
+  return {
+    id: user._id,
+    nome: user.nome,
+    email: user.email,
+    role: user.role,
+    turmaId: user.turmaId,
+    squadId: user.squadId,
+  };
+}
 }
