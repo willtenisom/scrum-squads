@@ -1,6 +1,6 @@
 "use client";
 
-import AlunosActions from "./AlunosActions";
+import AlunosActions from "./alunosActions";
 
 type Aluno = {
   id: string;

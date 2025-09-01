@@ -1,6 +1,6 @@
 "use client";
 
-import { EditSquadButton } from "./buttons";
+import SquadsActions from "./squads-actions";
 
 type Squad = {
   id: string;
@@ -9,23 +9,35 @@ type Squad = {
 
 export default function SquadsTable({ squads }: { squads: Squad[] }) {
   return (
-    <table className="min-w-full border border-gray-200 rounded-lg">
-      <thead>
-        <tr className="bg-gray-100">
-          <th className="p-2 text-left">Nome</th>
-          <th className="p-2 text-right">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {squads.map((squad) => (
-          <tr key={squad.id} className="border-t">
-            <td className="p-2">{squad.name}</td>
-            <td className="p-2 text-right">
-              <EditSquadButton id={squad.id} />
-            </td>
+    <div className="rounded-md border">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="border-b">
+            <th className="text-left py-2 pl-6 pr-3">Nome</th>
+            <th className="text-right py-2 pl-3 pr-6">Ações</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {squads.map((squad) => (
+            <tr key={squad.id} className="border-b last:border-none">
+              <td className="py-3 pl-6 pr-3">{squad.name}</td>
+              <td className="py-3 pl-3 pr-6">
+                <div className="flex justify-end">
+                  <SquadsActions id={squad.id} />
+                </div>
+              </td>
+            </tr>
+          ))}
+
+          {squads.length === 0 && (
+            <tr>
+              <td className="py-6 pl-6 pr-3 text-muted-foreground" colSpan={2}>
+                Nenhum squad encontrado.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 }
