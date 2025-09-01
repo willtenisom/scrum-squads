@@ -1,6 +1,6 @@
 "use client";
 
-import { UpdateAluno, DeleteAluno } from "@/components/alunos/buttons";
+import AlunosActions from "./AlunosActions";
 
 type Aluno = {
   id: string;
@@ -11,30 +11,37 @@ type Aluno = {
 
 export default function AlunosTable({ alunos }: { alunos: Aluno[] }) {
   return (
-    <div className="overflow-x-auto border rounded-lg">
-      <table className="w-full border-collapse">
-        <thead className="bg-gray-100 text-left">
-          <tr>
-            <th className="p-2 border">Nome</th>
-            <th className="p-2 border">Email</th>
-            <th className="p-2 border">Turma</th>
-            <th className="p-2 border">Ações</th>
+    <div className="rounded-md border">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="border-b">
+            <th className="text-left py-2 pl-6 pr-3">Nome</th>
+            <th className="text-left py-2 px-3">Email</th>
+            <th className="text-left py-2 px-3">Turma</th>
+            <th className="text-right py-2 pl-3 pr-6">Ações</th>
           </tr>
         </thead>
         <tbody>
           {alunos.map((aluno) => (
-            <tr key={aluno.id} className="hover:bg-gray-50">
-              <td className="p-2 border">{aluno.nome}</td>
-              <td className="p-2 border">{aluno.email}</td>
-              <td className="p-2 border">{aluno.turma_id}</td>
-              <td className="p-2 border space-x-2">
+            <tr key={aluno.id} className="border-b last:border-none">
+              <td className="py-3 pl-6 pr-3">{aluno.nome}</td>
+              <td className="py-3 px-3">{aluno.email}</td>
+              <td className="py-3 px-3">{aluno.turma_id}</td>
+              <td className="py-3 pl-3 pr-6">
                 <div className="flex justify-end gap-2">
-                  <UpdateAluno id={aluno.id} />
-                  <DeleteAluno id={aluno.id} />
+                  <AlunosActions id={aluno.id} />
                 </div>
               </td>
             </tr>
           ))}
+
+          {alunos.length === 0 && (
+            <tr>
+              <td className="py-6 pl-6 pr-3 text-muted-foreground" colSpan={4}>
+                Nenhum aluno encontrado.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

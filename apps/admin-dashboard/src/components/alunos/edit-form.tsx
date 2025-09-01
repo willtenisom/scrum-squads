@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 type Turma = {
   id: string;
@@ -42,39 +43,39 @@ export default function EditForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 max-w-md p-4 border rounded-lg"
+      className="space-y-4 p-4 bg-white rounded-lg border"
     >
       <div>
-        <label className="block text-sm font-medium">Nome</label>
+        <label className="block text-sm font-medium mb-1">Nome</label>
         <input
           type="text"
           name="nome"
           value={form.nome}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border px-3 py-2"
+          className="w-full rounded-md border px-3 py-2"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium">Email</label>
+        <label className="block text-sm font-medium mb-1">Email</label>
         <input
           type="email"
           name="email"
           value={form.email}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border px-3 py-2"
+          className="w-full rounded-md border px-3 py-2"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium">Turma</label>
+        <label className="block text-sm font-medium mb-1">Turma</label>
         <select
           name="turma_id"
           value={form.turma_id}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border px-3 py-2"
+          className="w-full rounded-md border px-3 py-2"
           required
         >
           <option value="">Selecione uma turma</option>
@@ -86,12 +87,7 @@ export default function EditForm({
         </select>
       </div>
 
-      <button
-        type="submit"
-        className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-      >
-        Salvar alterações
-      </button>
+      <Button type="submit">Salvar alterações</Button>
     </form>
   );
 }

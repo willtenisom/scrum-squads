@@ -11,7 +11,15 @@ export default async function Page({ params }: { params: { id: string } }) {
   }
 
   return (
-    <main>
+    <div className="w-full space-y-6">
+      {" "}
+      {}
+      <div className="flex w-full items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight text-black">
+          Editar Aluno
+        </h1>
+      </div>
+      {}
       <Breadcrumbs
         breadcrumbs={[
           { label: "Alunos", href: "/dashboard/alunos" },
@@ -22,8 +30,11 @@ export default async function Page({ params }: { params: { id: string } }) {
           },
         ]}
       />
-
-      <Form aluno={aluno} turmas={turmas} />
-    </main>
+      <div className="mt-6">
+        {" "}
+        {}
+        <Form aluno={aluno} turmas={turmas} />
+      </div>
+    </div>
   );
 }

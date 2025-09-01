@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 type Turma = {
   id: string;
@@ -32,7 +33,7 @@ export default function CreateForm({ turmas }: { turmas: Turma[] }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 p-4 bg-white shadow rounded-lg"
+      className="space-y-4 p-4 bg-white rounded-lg border"
     >
       <div>
         <label className="block text-sm font-medium mb-1">Nome</label>
@@ -76,12 +77,7 @@ export default function CreateForm({ turmas }: { turmas: Turma[] }) {
         </select>
       </div>
 
-      <button
-        type="submit"
-        className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-      >
-        Adicionar Aluno
-      </button>
+      <Button type="submit">Adicionar Aluno</Button>
     </form>
   );
 }
