@@ -1,134 +1,78 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/context/auth";
-import { Button } from "@/components/ui/button";
+import { Users, GraduationCap, Layers } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Card } from "@/components/ui/card";
 
-interface Aluno {
-  _id: string;
-  nome: string;
-  email: string;
-}
-
-interface AlunoWithSource extends Aluno {
-  source: "turma" | "squad" | "both";
-}
+const GraficoCircular = dynamic(
+  () => import("@/components/dashboard/grafico-circular"),
+  { ssr: false }
+);
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const { token, user, logout } = useAuth();
+  // Mock temporário (até conectar ao backend)
+  const totalAlunos = 120;
+  const totalTurmas = 8;
+  const totalSquads = 5;
 
-  const [alunos, setAlunos] = useState<AlunoWithSource[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!token) {
-      router.push("/login");
-    } else if (user?.role === "user") {
-      fetchAlunos();
-    }
-  }, [token, user, router]);
-
-  const fetchAlunos = async () => {
-    setLoading(true);
-    try {
-      const turmaAlunos: Aluno[] = user?.turmaId
-        ? await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/turmas/${user.turmaId}/alunos`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          ).then(res => res.json())
-        : [];
-
-      const squadAlunos: Aluno[] = user?.squadId
-        ? await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/squads/${user.squadId}/alunos`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          ).then(res => res.json())
-        : [];
-
-      const map = new Map<string, AlunoWithSource>();
-
-      turmaAlunos.forEach(aluno => {
-        map.set(aluno._id, { ...aluno, source: "turma" });
-      });
-
-      squadAlunos.forEach(aluno => {
-        if (map.has(aluno._id)) {
-          map.set(aluno._id, { ...aluno, source: "both" });
-        } else {
-          map.set(aluno._id, { ...aluno, source: "squad" });
-        }
-      });
-
-      setAlunos(Array.from(map.values()));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!token) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Redirecionando para o login...</p>
-      </div>
-    );
-  }
+  const alunosAtivos = 75;
+  const squadsComTurma = 40;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-8">
-      <div className="w-full max-w-4xl rounded-lg bg-white p-8 shadow-md">
-        <div className="flex items-center justify-between border-b pb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              {user?.role === "admin" ? "Admin Dashboard" : "Aluno Dashboard"}
-            </h1>
-            <p className="text-gray-600">
-              {user?.role === "admin"
-                ? `Bem-vindo(a), ${user.nome || "Administrador"}!`
-                : `Bem-vindo(a), ${user.nome || "Aluno"}!`}
-            </p>
+    <div className="p-6 space-y-10">
+      {}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="rounded-2xl border bg-white p-6 shadow-md hover:shadow-lg transition">
+          <div className="flex items-center gap-3 mb-4">
+            <Users className="w-6 h-6 text-blue-600" />
+            <span className="font-medium text-gray-600">Total de Alunos</span>
           </div>
-          <Button onClick={logout} variant="destructive">
-            Sair
-          </Button>
+          <p className="text-4xl font-bold text-gray-800">{totalAlunos}</p>
         </div>
 
-        {user?.role === "admin" ? (
-          <div className="mt-6">
-            <p className="text-lg">Aqui você pode gerenciar os registros das dailys e turmas.</p>
+        <div className="rounded-2xl border bg-white p-6 shadow-md hover:shadow-lg transition">
+          <div className="flex items-center gap-3 mb-4">
+            <GraduationCap className="w-6 h-6 text-green-600" />
+            <span className="font-medium text-gray-600">Total de Turmas</span>
           </div>
-        ) : (
-          <div className="mt-6">
-            <p className="text-lg mb-2">Colegas da sua turma e squad:</p>
-            {loading ? (
-              <p>Carregando...</p>
-            ) : (
-              <ul className="list-disc pl-5 space-y-1">
-                {alunos.map((aluno) => (
-                  <li key={aluno._id}>
-                    {aluno.nome} ({aluno.email}){" "}
-                    <span className={`px-1 rounded text-white text-xs ml-2 ${
-                      aluno.source === "turma"
-                        ? "bg-blue-500"
-                        : aluno.source === "squad"
-                        ? "bg-green-500"
-                        : "bg-purple-500"
-                    }`}>
-                      {aluno.source === "both"
-                        ? "Turma + Squad"
-                        : aluno.source === "turma"
-                        ? "Turma"
-                        : "Squad"}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <p className="text-4xl font-bold text-gray-800">{totalTurmas}</p>
+        </div>
+
+        <div className="rounded-2xl border bg-white p-6 shadow-md hover:shadow-lg transition">
+          <div className="flex items-center gap-3 mb-4">
+            <Layers className="w-6 h-6 text-purple-600" />
+            <span className="font-medium text-gray-600">Total de Squads</span>
           </div>
-        )}
+          <p className="text-4xl font-bold text-gray-800">{totalSquads}</p>
+        </div>
+      </div>
+
+      {/* Indicadores com gráficos circulares */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <GraficoCircular
+          title="% de Alunos Ativos"
+          value={alunosAtivos}
+          color="#3b82f6"
+        />
+        <GraficoCircular
+          title="% de Squads com Turmas"
+          value={squadsComTurma}
+          color="#10b981"
+        />
+      </div>
+
+      {/* Últimos alunos cadastrados */}
+      <div>
+        <Card className="rounded-2xl border bg-white p-6 shadow-md">
+          <h2 className="text-xl font-semibold mb-4">
+            Últimos Alunos Cadastrados
+          </h2>
+          <ul className="space-y-2 text-gray-700">
+            <li>👤 João Silva</li>
+            <li>👤 Maria Oliveira</li>
+            <li>👤 Pedro Santos</li>
+          </ul>
+        </Card>
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
+/* Habilita Tailwind v4 */
 @import "tailwindcss";
-@import "tw-animate-css";
 
+/* Variantes customizadas */
 @custom-variant dark (&:is(.dark *));
 
+/* Design system */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

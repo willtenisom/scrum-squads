@@ -1,32 +1,29 @@
-"use client";
+import Breadcrumbs from "@/components/ui/breadcrumbs";
+import EditTurmaForm from "@/components/turmas/edit-form";
+import { fetchTurmaById } from "@/lib/data";
+import { notFound } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+export default async function Page({ params }: { params: { id: string } }) {
+  const turma = await fetchTurmaById(params.id);
 
-export default function EditarTurmaPage() {
-  const { id } = useParams();
-  const router = useRouter();
-  const [nome, setNome] = useState("Turma Exemplo");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert(`Turma ${id} atualizada!`);
-    router.push("/dashboard/turmas");
-  };
+  if (!turma) {
+    notFound();
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Editar Turma #{id}</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          className="border rounded-md px-3 py-2 w-full"
-        />
-        <Button type="submit">Salvar alterações</Button>
-      </form>
-    </div>
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: "Turmas", href: "/dashboard/turmas" },
+          {
+            label: "Editar Turma",
+            href: `/dashboard/turmas/${params.id}/editar`,
+            active: true,
+          },
+        ]}
+      />
+      {}
+      <EditTurmaForm turma={turma} />
+    </main>
   );
 }

@@ -1,33 +1,29 @@
-"use client";
+import Form from "@/components/alunos/edit-form";
+import Breadcrumbs from "@/components/ui/breadcrumbs";
+import { fetchAlunoById, fetchTurmas } from "@/lib/data";
 
-import { Button } from "@/components/ui/button";
-import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+export default async function Page({ params }: { params: { id: string } }) {
+  const aluno = await fetchAlunoById(params.id);
+  const turmas = await fetchTurmas("", 1);
 
-export default function EditarAlunoPage() {
-  const { id } = useParams();
-  const router = useRouter();
-  const [nome, setNome] = useState("Aluno Exemplo");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    alert(`Aluno ${id} atualizado!`);
-    router.push("/dashboard/alunos");
-  };
+  if (!aluno) {
+    return <div>Aluno não encontrado</div>;
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Editar Aluno #{id}</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          className="border rounded-md px-3 py-2 w-full"
-        />
-        <Button type="submit">Salvar alterações</Button>
-      </form>
-    </div>
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: "Alunos", href: "/dashboard/alunos" },
+          {
+            label: "Editar Aluno",
+            href: `/dashboard/alunos/${params.id}/editar`,
+            active: true,
+          },
+        ]}
+      />
+
+      <Form aluno={aluno} turmas={turmas} />
+    </main>
   );
 }

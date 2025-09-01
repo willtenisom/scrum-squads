@@ -58,7 +58,13 @@ export default function AdminAuthPage() {
 
   const registerUserForm = useForm<RegisterUserForm>({
     resolver: zodResolver(registerUserSchema),
-    defaultValues: { nome: "", email: "", password: "", turmaId: "", squadId: "" },
+    defaultValues: {
+      nome: "",
+      email: "",
+      password: "",
+      turmaId: "",
+      squadId: "",
+    },
   });
 
   // Handlers
@@ -67,16 +73,27 @@ export default function AdminAuthPage() {
     loginForm.clearErrors();
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      );
       const data = await res.json();
 
       if (!res.ok) {
-        if (data.message === "Email não encontrado") loginForm.setError("email", { type: "manual", message: data.message });
-        else if (data.message === "Senha incorreta") loginForm.setError("password", { type: "manual", message: data.message });
+        if (data.message === "Email não encontrado")
+          loginForm.setError("email", {
+            type: "manual",
+            message: data.message,
+          });
+        else if (data.message === "Senha incorreta")
+          loginForm.setError("password", {
+            type: "manual",
+            message: data.message,
+          });
         else toast.error(data.message || "Falha no login");
         return;
       }
@@ -96,17 +113,32 @@ export default function AdminAuthPage() {
     registerAdminForm.clearErrors();
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register-admin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register-admin`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      );
       const data = await res.json();
 
       if (!res.ok) {
-        if (data.message?.includes("email")) registerAdminForm.setError("email", { type: "manual", message: data.message });
-        else if (data.message?.includes("senha")) registerAdminForm.setError("password", { type: "manual", message: data.message });
-        else if (data.message?.includes("Chave")) registerAdminForm.setError("secretKey", { type: "manual", message: data.message });
+        if (data.message?.includes("email"))
+          registerAdminForm.setError("email", {
+            type: "manual",
+            message: data.message,
+          });
+        else if (data.message?.includes("senha"))
+          registerAdminForm.setError("password", {
+            type: "manual",
+            message: data.message,
+          });
+        else if (data.message?.includes("Chave"))
+          registerAdminForm.setError("secretKey", {
+            type: "manual",
+            message: data.message,
+          });
         else toast.error(data.message || "Falha no cadastro");
         return;
       }
@@ -125,11 +157,14 @@ export default function AdminAuthPage() {
     registerUserForm.clearErrors();
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      );
       const data = await res.json();
 
       if (!res.ok) {
@@ -151,7 +186,9 @@ export default function AdminAuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <Card className="w-[420px] shadow-xl">
         <CardHeader>
-          <CardTitle className="text-center text-2xl text-blue-500">Login</CardTitle>
+          <CardTitle className="text-center text-2xl text-blue-500">
+            Login
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
@@ -163,22 +200,41 @@ export default function AdminAuthPage() {
 
             {/* Login */}
             <TabsContent value="login">
-              <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+              <form
+                onSubmit={loginForm.handleSubmit(handleLogin)}
+                className="space-y-4"
+              >
                 <div>
                   <Label>Email</Label>
-                  <Input type="email" {...loginForm.register("email")} placeholder="seu@email.com" />
+                  <Input
+                    type="email"
+                    {...loginForm.register("email")}
+                    placeholder="seu@email.com"
+                  />
                   {loginForm.formState.errors.email && (
-                    <p className="text-sm text-red-500">{loginForm.formState.errors.email?.message}</p>
+                    <p className="text-sm text-red-500">
+                      {loginForm.formState.errors.email?.message}
+                    </p>
                   )}
                 </div>
                 <div>
                   <Label>Senha</Label>
-                  <Input type="password" {...loginForm.register("password")} placeholder="********" />
+                  <Input
+                    type="password"
+                    {...loginForm.register("password")}
+                    placeholder="********"
+                  />
                   {loginForm.formState.errors.password && (
-                    <p className="text-sm text-red-500">{loginForm.formState.errors.password?.message}</p>
+                    <p className="text-sm text-red-500">
+                      {loginForm.formState.errors.password?.message}
+                    </p>
                   )}
                 </div>
-                <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white" disabled={loading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                  disabled={loading}
+                >
                   {loading ? "Entrando..." : "Entrar"}
                 </Button>
               </form>
@@ -186,24 +242,46 @@ export default function AdminAuthPage() {
 
             {/* Cadastro Admin */}
             <TabsContent value="register-admin">
-              <form onSubmit={registerAdminForm.handleSubmit(handleRegisterAdmin)} className="space-y-4">
+              <form
+                onSubmit={registerAdminForm.handleSubmit(handleRegisterAdmin)}
+                className="space-y-4"
+              >
                 <div>
                   <Label>Nome</Label>
-                  <Input {...registerAdminForm.register("nome")} placeholder="Seu nome" />
+                  <Input
+                    {...registerAdminForm.register("nome")}
+                    placeholder="Seu nome"
+                  />
                 </div>
                 <div>
                   <Label>Email</Label>
-                  <Input type="email" {...registerAdminForm.register("email")} placeholder="admin@email.com" />
+                  <Input
+                    type="email"
+                    {...registerAdminForm.register("email")}
+                    placeholder="admin@email.com"
+                  />
                 </div>
                 <div>
                   <Label>Senha</Label>
-                  <Input type="password" {...registerAdminForm.register("password")} placeholder="********" />
+                  <Input
+                    type="password"
+                    {...registerAdminForm.register("password")}
+                    placeholder="********"
+                  />
                 </div>
                 <div>
                   <Label>Chave de Autorização</Label>
-                  <Input type="password" {...registerAdminForm.register("secretKey")} placeholder="********" />
+                  <Input
+                    type="password"
+                    {...registerAdminForm.register("secretKey")}
+                    placeholder="********"
+                  />
                 </div>
-                <Button type="submit" className="w-full bg-green-500 hover:bg-green-600 text-white" disabled={loading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-green-500 hover:bg-green-600 text-white"
+                  disabled={loading}
+                >
                   {loading ? "Cadastrando..." : "Cadastrar Admin"}
                 </Button>
               </form>
@@ -211,28 +289,52 @@ export default function AdminAuthPage() {
 
             {/* Cadastro Usuário Comum */}
             <TabsContent value="register-user">
-              <form onSubmit={registerUserForm.handleSubmit(handleRegisterUser)} className="space-y-4">
+              <form
+                onSubmit={registerUserForm.handleSubmit(handleRegisterUser)}
+                className="space-y-4"
+              >
                 <div>
                   <Label>Nome</Label>
-                  <Input {...registerUserForm.register("nome")} placeholder="Seu nome" />
+                  <Input
+                    {...registerUserForm.register("nome")}
+                    placeholder="Seu nome"
+                  />
                 </div>
                 <div>
                   <Label>Email</Label>
-                  <Input type="email" {...registerUserForm.register("email")} placeholder="usuario@email.com" />
+                  <Input
+                    type="email"
+                    {...registerUserForm.register("email")}
+                    placeholder="usuario@email.com"
+                  />
                 </div>
                 <div>
                   <Label>Senha</Label>
-                  <Input type="password" {...registerUserForm.register("password")} placeholder="********" />
+                  <Input
+                    type="password"
+                    {...registerUserForm.register("password")}
+                    placeholder="********"
+                  />
                 </div>
                 <div>
                   <Label>ID da Turma</Label>
-                  <Input {...registerUserForm.register("turmaId")} placeholder="opcional" />
+                  <Input
+                    {...registerUserForm.register("turmaId")}
+                    placeholder="opcional"
+                  />
                 </div>
                 <div>
                   <Label>ID do Squad</Label>
-                  <Input {...registerUserForm.register("squadId")} placeholder="opcional" />
+                  <Input
+                    {...registerUserForm.register("squadId")}
+                    placeholder="opcional"
+                  />
                 </div>
-                <Button type="submit" className="w-full bg-purple-500 hover:bg-purple-600 text-white" disabled={loading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-purple-500 hover:bg-purple-600 text-white"
+                  disabled={loading}
+                >
                   {loading ? "Cadastrando..." : "Cadastrar Usuário"}
                 </Button>
               </form>

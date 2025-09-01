@@ -1,29 +1,24 @@
-"use client";
+import Form from "@/components/alunos/create-form";
+import Breadcrumbs from "@/components/ui/breadcrumbs";
+import { fetchTurmas } from "@/lib/data";
 
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-
-export default function CriarAlunoPage() {
-  const router = useRouter();
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    alert("Aluno criado!");
-    router.push("/dashboard/alunos");
-  };
+export default async function Page() {
+  const turmas = await fetchTurmas("", 1);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Criar Aluno</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Nome do aluno"
-          className="border rounded-md px-3 py-2 w-full"
-        />
-        <Button type="submit">Salvar</Button>
-      </form>
-    </div>
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: "Alunos", href: "/dashboard/alunos" },
+          {
+            label: "Criar Aluno",
+            href: "/dashboard/alunos/criar",
+            active: true,
+          },
+        ]}
+      />
+
+      <Form turmas={turmas} />
+    </main>
   );
 }

@@ -1,24 +1,49 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import Pagination from "@/components/ui/pagination";
+import Search from "@/components/ui/search";
+import Table from "@/components/alunos/table";
+import { CreateAluno } from "@/components/alunos/buttons";
+import { lusitana } from "@/components/ui/fonts";
+import { InvoicesTableSkeleton } from "@/components/ui/skeletons";
+import { Suspense } from "react";
+import { fetchAlunos, fetchAlunosPages } from "@/lib/data";
 
-export default function AlunosPage() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: {
+    query?: string;
+    page?: string;
+  };
+}) {
+  const query = searchParams?.query || "";
+  const currentPage = Number(searchParams?.page) || 1;
+
+  const alunos = await fetchAlunos(query, currentPage);
+  const totalPages = await fetchAlunosPages(query);
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Alunos</h1>
-        <Link href="/dashboard/alunos/criar">
-          <Button>Criar aluno</Button>
-        </Link>
+    <div className="w-full space-y-6">
+      {}
+      <div className="flex w-full items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight text-black">Alunos</h1>
       </div>
 
       {}
-      <div className="border rounded-md p-4">
-        <p>Listagem de alunos (tabela aqui)</p>
-        <Link href="/dashboard/alunos/1/editar">
-          <Button variant="outline" className="mt-2">
-            Editar aluno #1
-          </Button>
-        </Link>
+      <div className="flex items-center justify-between gap-2">
+        <Search placeholder="Buscar alunos..." />
+        <CreateAluno />
+      </div>
+
+      {}
+      <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
+        <div className="mt-6">
+          <Table alunos={alunos} />
+        </div>
+      </Suspense>
+
+      {}
+      <div className="flex w-full justify-center">
+        <Pagination totalPages={totalPages} currentPage={currentPage} />
       </div>
     </div>
   );
