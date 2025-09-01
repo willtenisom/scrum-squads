@@ -1,4 +1,4 @@
-import { UpdateTurma, DeleteTurma } from "@/components/turmas/buttons";
+import TurmaActions from "./TurmaActions";
 
 type Turma = {
   id: string | number;
@@ -23,9 +23,9 @@ export default function Table({ turmas }: { turmas: Turma[] }) {
               <td className="py-3 pl-6 pr-3">{t.nome}</td>
               <td className="py-3 px-3">{t.ano}</td>
               <td className="py-3 pl-3 pr-6">
-                <div className="flex justify-end gap-2">
-                  <UpdateTurma id={t.id} />
-                  <DeleteTurma id={t.id} />
+                {}
+                <div className="flex justify-end">
+                  <TurmaActions id={t.id} />
                 </div>
               </td>
             </tr>
