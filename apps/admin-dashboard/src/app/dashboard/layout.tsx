@@ -2,27 +2,34 @@
 
 import { useAuth } from "@/app/context/auth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import SideNav from "@/components/dashboard/SideNav";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, token } = useAuth();
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (token !== undefined) {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (loading) return;
+
     if (!token) {
       router.push("/login");
     } else if (user && user.role !== "admin") {
       router.push("/");
     }
-  }, [token, user, router]);
+  }, [loading, token, user, router]);
 
-  if (!user || user.role !== "admin") {
+  if (loading || !token || (user && user.role !== "admin")) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-gray-600">
-          Verificando permissões de administrador...
-        </p>
+        <p className="text-gray-600">Verificando permissões...</p>
       </div>
     );
   }
